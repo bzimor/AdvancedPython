@@ -1,7 +1,5 @@
 import os
-import subprocess
 import datetime
-import logging
 
 
 def print_quit():
@@ -48,8 +46,8 @@ def main():
                     target_path = command.split(" ")[1]
                     change_dir(target_path)
             else:
-                process, error = run_command(command)
-                write_command_log(original_path, process)
+                process = run_command(command)
+                write_command_log(original_path, process, command)
         except EOFError:
             print_quit()
             keep_looping = False
@@ -58,21 +56,17 @@ def main():
 
 
 def run_command(command):
-    command_list = command.split(" ")
-    process = subprocess.Popen(command_list, shell=True)
-    output, error = process.communicate()
-    process.wait()
-
-    return process, error
+    process = os.system(command)
+    return process
 
 
-def write_command_log(path, process):
+def write_command_log(path, process, command):
     time_str = "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
-    cmd_str = process.args[0]
-    args_str = process.args[1:]
-    pid_str = str(process.pid)
-    exit_str = str(process.returncode)
-    stdout_str = "stdout"
+    cmd_str = command.split(" ")[0]
+    args_str = command.split(" ")[1:] if len(command.split(" ")) >= 2 else ""
+    pid_str = str(os.getpid())
+    exit_str = str(process)
+    stdout_str = "-"
 
     log_str = "\n" + time_str + " cmd: " + cmd_str + ", args: " + str(
         args_str) + ", stdout: " + stdout_str + ", pid: " + pid_str + ", exit: " + exit_str
