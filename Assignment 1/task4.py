@@ -1,7 +1,6 @@
 import os
 import subprocess
 import datetime
-import logging
 
 
 def print_quit():
@@ -12,7 +11,7 @@ def change_dir(target_path):
     try:
         os.chdir(target_path)
     except FileNotFoundError:
-        print(target_path + ' does NOT exist.')
+        pass
 
 
 def get_current_path(current_path):
@@ -21,10 +20,6 @@ def get_current_path(current_path):
         return path_str
     except:
         return ""
-
-
-def run_command(command):
-    os.system(command)
 
 
 def main():
@@ -43,17 +38,11 @@ def main():
             if command == 'exit':
                 print_quit()
                 keep_looping = False
-            elif command[0:2] == "cd":
-                # Q: can't use subprocess directly, the error should be handle separately
-                split_command = command.split(" ")
-                if len(split_command) > 1:
-                    target_path = command.split(" ")[1]
-                    change_dir(target_path)
             else:
-                process, error = run_command(command)
-                write_command_log(original_path, process)
+                process, error, output = run_command(command)
+                write_command_log(original_path, command, process, output)
 
-                if error is not None:
+                if process.returncode != 0:
                     write_error_log(original_path, error)
         except EOFError:
             print_quit()
@@ -63,25 +52,32 @@ def main():
 
 
 def run_command(command):
-    command_list = command.split(" ")
     # Q: if we use subprocess.PIPE we can hide the error but we can't run in the interactive mode like 'python' command
-    # Q: if we use shell=True, we can get the error massage, but if we run something like cat, it show nothing
-    process = subprocess.Popen(command_list, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    output, error = process.communicate()
-    process.wait()
+    process = subprocess.Popen(command, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, close_fds=True, text=True)
+    output = process.stdout.read()
     print(output.strip())
-    return process, error
+    error = process.communicate()[1]
+
+    if command[0:2] == "cd":
+        # Q: can't use subprocess directly, the error should be handle separately
+        split_command = command.split(" ")
+        if len(split_command) > 1:
+            target_path = command.split(" ")[1]
+            change_dir(target_path)
+
+    return process, str(error), output
 
 
 # Q: command log is still manual
-def write_command_log(path, process):
+def write_command_log(path, command, process, output):
+    command_list = command.split(" ")
     time_str = "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
-    cmd_str = process.args[0]
-    args_str = process.args[1:]
+    cmd_str = command_list[0]
+    args_str = command_list[1:]
     pid_str = str(process.pid)
     exit_str = str(process.returncode)
-    # Q: stdout number?
-    stdout_str = "len(process.stdout.readlines())"
+    stdout_str = str(len(output.split("\n")))
 
     log_str = "\n" + time_str + " cmd: " + cmd_str + ", args: " + str(
         args_str) + ", stdout: " + stdout_str + ", pid: " + pid_str + ", exit: " + exit_str
@@ -95,7 +91,7 @@ def write_command_log(path, process):
 def write_error_log(path, log):
     file_path = path + "/myshell.stderr"
     f = open(file_path, "a+")
-    f.write(log)
+    f.write(log.strip() + "\n")
     f.close()
 
 

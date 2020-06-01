@@ -1,7 +1,6 @@
 import os
 import subprocess
 import datetime
-import sys
 
 
 def print_quit():
@@ -40,8 +39,8 @@ def main():
                 print_quit()
                 keep_looping = False
             else:
-                process, error = run_command(command)
-                write_command_log(original_path, process)
+                process, error, output = run_command(command)
+                write_command_log(original_path, command, process, output)
 
                 if process.returncode != 0:
                     write_error_log(original_path, error)
@@ -54,7 +53,8 @@ def main():
 
 def run_command(command):
     # Q: if we use subprocess.PIPE we can hide the error but we can't run in the interactive mode like 'python' command
-    process = subprocess.Popen(command, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True, text=True)
+    process = subprocess.Popen(command, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, close_fds=True, text=True)
     output = process.stdout.read()
     print(output.strip())
     error = process.communicate()[1]
@@ -66,18 +66,18 @@ def run_command(command):
             target_path = command.split(" ")[1]
             change_dir(target_path)
 
-    return process, str(error)
+    return process, str(error), output
 
 
 # Q: command log is still manual
-def write_command_log(path, process):
+def write_command_log(path, command, process, output):
+    command_list = command.split(" ")
     time_str = "[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "]"
-    cmd_str = process.args[0]
-    args_str = process.args[1:]
+    cmd_str = command_list[0]
+    args_str = command_list[1:]
     pid_str = str(process.pid)
     exit_str = str(process.returncode)
-    # Q: stdout number?
-    stdout_str = "len(process.stdout.readlines())"
+    stdout_str = str(len(output.split("\n")))
 
     log_str = "\n" + time_str + " cmd: " + cmd_str + ", args: " + str(
         args_str) + ", stdout: " + stdout_str + ", pid: " + pid_str + ", exit: " + exit_str
