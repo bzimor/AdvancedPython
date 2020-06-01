@@ -12,7 +12,7 @@ def change_dir(target_path):
     try:
         os.chdir(target_path)
     except FileNotFoundError:
-        print(target_path + ' does NOT exist.')
+        pass
 
 
 def get_current_path(current_path):
@@ -39,12 +39,6 @@ def main():
             if command == 'exit':
                 print_quit()
                 keep_looping = False
-            elif command[0:2] == "cd":
-                # Q: can't use subprocess directly, the error should be handle separately
-                split_command = command.split(" ")
-                if len(split_command) > 1:
-                    target_path = command.split(" ")[1]
-                    change_dir(target_path)
             else:
                 process, error = run_command(command)
                 write_command_log(original_path, process)
@@ -64,6 +58,13 @@ def run_command(command):
     output = process.stdout.read()
     print(output.strip())
     error = process.communicate()[1]
+
+    if command[0:2] == "cd":
+        # Q: can't use subprocess directly, the error should be handle separately
+        split_command = command.split(" ")
+        if len(split_command) > 1:
+            target_path = command.split(" ")[1]
+            change_dir(target_path)
 
     return process, str(error)
 
