@@ -43,9 +43,11 @@ class ByteCodeDisassambler:
             bytecode = dis.Bytecode(filename)
         elif os.path.exists(filename):
             if self.compiled:
-                func = open(filename, 'rb')
-                code = marshal.load(func)
-                bytecode = dis.Bytecode(code)
+                with open(filename, "rb") as fh:
+                    # ignore header
+                    header_bytes = fh.read(16)
+                    code = marshal.load(fh)
+                    bytecode = dis.Bytecode(code)
             else:
                 func = open(filename).read()
                 bytecode = dis.Bytecode(func)
