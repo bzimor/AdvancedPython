@@ -8,14 +8,15 @@ import dis
 
 
 class ByteCodeDisassambler:
-    """\nusage: bc_printer.py -py src.py\n\nThis program yields opcodes (and their arguments) for ordinary python programs"""
+    """\nusage: bc_printer.py -py src.py
+    
+    This program yields opcodes (and their arguments) for ordinary python programs"""
 
     argument = ""
 
     def __init__(self, arguments=""):
         if len(arguments) > 1 and arguments[0] == '-py':
             self.argument = arguments[1]
-            print(arguments[1])
             self.__print_result()
         else:
             print(self.__doc__)

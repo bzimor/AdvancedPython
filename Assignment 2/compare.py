@@ -7,7 +7,9 @@ import math
 
 
 class WhoIsFaster:
-    """\nusage: compare.py [files]\n\nThis program takes N arbitrary .py files and creates a neat table out of their execution time ranking by who-is-faster"""
+    """\nusage: compare.py [files]
+    
+    This program takes N arbitrary .py files and creates a neat table out of their execution time ranking by who-is-faster"""
 
     arguments = ""
 
