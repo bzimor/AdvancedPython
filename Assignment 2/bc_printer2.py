@@ -9,7 +9,7 @@ import marshal
 
 
 class ByteCodeDisassambler:
-    """\nusage: bc_printer.py -py src.py
+    """\nusage: bc_printer.py -format src
     
     This program yields opcodes (and their arguments) for ordinary python programs from py, pyc and string code:
     
@@ -43,11 +43,17 @@ class ByteCodeDisassambler:
             bytecode = dis.Bytecode(filename)
         elif os.path.exists(filename):
             if self.compiled:
-                with open(filename, "rb") as fh:
-                    # ignore header
-                    header_bytes = fh.read(16)
-                    code = marshal.load(fh)
-                    bytecode = dis.Bytecode(code)
+                header_size = 8
+                if sys.version_info >= (3, 6):
+                    header_size = 12
+                if sys.version_info >= (3, 7):
+                    header_size = 16
+                if self.compiled:
+                    with open(filename, "rb") as fh:
+                        # ignore header
+                        header_bytes = fh.read(header_size)
+                        code = marshal.load(fh)
+                        bytecode = dis.Bytecode(code)
             else:
                 func = open(filename).read()
                 bytecode = dis.Bytecode(func)

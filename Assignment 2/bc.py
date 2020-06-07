@@ -2,8 +2,6 @@
 
 import sys
 import os
-import time
-import math
 import dis
 import marshal
 import py_compile
@@ -56,10 +54,17 @@ class ByteCodeDisassambler:
         if self.src:
             bytecode = dis.Bytecode(filename)
         elif os.path.exists(filename):
+            header_size = 8
+            if sys.version_info >= (3, 6):
+                header_size = 12
+            if sys.version_info >= (3, 7):
+                header_size = 16
             if self.compiled:
-                func = open(filename, 'rb')
-                code = marshal.load(func)
-                bytecode = dis.Bytecode(code)
+                with open(filename, "rb") as fh:
+                    # ignore header
+                    header_bytes = fh.read(header_size)
+                    code = marshal.load(fh)
+                    bytecode = dis.Bytecode(code)
             else:
                 func = open(filename).read()
                 bytecode = dis.Bytecode(func)
