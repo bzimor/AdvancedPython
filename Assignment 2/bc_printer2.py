@@ -2,8 +2,6 @@
 
 import sys
 import os
-import time
-import math
 import dis
 import marshal
 
