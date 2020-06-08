@@ -34,6 +34,8 @@ class ByteCodeDisassambler:
                     self.src = True
                 self.__compile_code(arguments[2])
             elif arguments[0] == 'print':
+                is_compiled = False
+                is_src = False
                 if arguments[1] == '-pyc':
                     is_compiled = True
                 elif arguments[1] == '-s':
@@ -44,10 +46,11 @@ class ByteCodeDisassambler:
                 if (len(file_arguments) % 2) == 0:
                     self.__compare(file_arguments)
                 else:
-                    print('Arguments missmatch')
+                    print('Arguments mismatch')
         else:
             print(self.__doc__)
 
+    # function for compile format
     def __compile_code(self, code):
         if self.src:
             with open('out.py', 'w') as f:
@@ -56,16 +59,19 @@ class ByteCodeDisassambler:
         else:
             py_compile.compile(code)
 
+    # function for convert code into bytecode
     def __get_bytecode(self, filename, is_src, is_compiled):
         bytecode = False
         if is_src:
             bytecode = dis.Bytecode(filename)
         elif os.path.exists(filename):
+            # header size checking (different python version has different header compiled file)
             header_size = 8
             if sys.version_info >= (3, 6):
                 header_size = 12
             if sys.version_info >= (3, 7):
                 header_size = 16
+
             if is_compiled:
                 with open(filename, "rb") as fh:
                     # ignore header
@@ -77,9 +83,11 @@ class ByteCodeDisassambler:
                 bytecode = dis.Bytecode(func)
         return bytecode
 
+    # function to compare bytecode
     def __compare(self, arguments):
         files_dict = dict()
         n = len(arguments)
+        # get arguments filename/code and format (-s,-py,-pyc)
         for i in range(1, n, 2):
             if arguments[i - 1] in ['-s', '-pyc', '-py']:
                 file_name = arguments[i]
@@ -89,6 +97,7 @@ class ByteCodeDisassambler:
                 pass
 
         if len(files_dict) > 0:
+            # call compare bytecode function
             raw_result = self.__compare_bytecode(files_dict)
             # sorting the result
             sorted_result = sorted(raw_result.items(), key=lambda x: max(x[1]), reverse=True)
@@ -113,6 +122,7 @@ class ByteCodeDisassambler:
             pass
 
     def __compare_bytecode(self, arguments):
+        # make temp dictionary for final result
         compared_result = dict()
         i = 0
         for key, value in arguments.items():
@@ -125,7 +135,10 @@ class ByteCodeDisassambler:
             elif file_type == '-pyc':
                 is_compiled = True
 
+            # call bytecode function based on the parameter, it returns bytecode
             bytecode = self.__get_bytecode(key, is_src, is_compiled)
+
+            # save bytecode data in compared_result dictionary
             for line in bytecode:
                 if line.opname not in compared_result:
                     # make empty array which is equals to argument length (number of file or source)
