@@ -1,6 +1,6 @@
 import inspect
 import os
-
+import inspect
 
 def reflect(func):
     """Decorator for task 1, inspect the caller function using inspect.getsource()"""
@@ -27,10 +27,10 @@ def reflect(func):
         print('{:9}{}'.format('Name:', func.__name__))
         print('{:9}{}'.format('Type:', type(func)))
         print('{:9}{}'.format('Sign:', inspect.signature(func)))
-        print('{:9}{}'.format('Args:', '-'))
+        print('{:9}{}'.format('Args:', func.__code__.co_varnames))
         print(get_doc())
         print(get_src())
-        print('{:9}'.format('Output:'))
+        print('{:9}'.format('Output:', ''))
         func(*args, **kwargs)
 
     return func_wrapper
