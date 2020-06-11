@@ -1,6 +1,7 @@
 import inspect
 import os
-import inspect
+import sys, io
+
 
 def reflect(func):
     """Decorator for task 1, inspect the caller function using inspect.getsource()"""
@@ -30,8 +31,20 @@ def reflect(func):
         print('{:9}{}'.format('Args:', func.__code__.co_varnames))
         print(get_doc())
         print(get_src())
-        print('{:9}'.format('Output:', ''))
+
+        stdout = sys.stdout
+        s = io.StringIO()
+        sys.stdout = s
         func(*args, **kwargs)
+        s.seek(0)
+        sys.stdout = stdout
+        output = s.read()
+        output = output.splitlines()
+        for i, o in enumerate(output):
+            if i == 0:
+                print('{:9}{}'.format('Output:', o))
+            else:
+                print('{:9}{}'.format('', o))
 
     return func_wrapper
 
