@@ -1,8 +1,7 @@
 # python -V 3.8
 
-import sys
 import fileinput
-import os
+import math
 
 operators = ['+', '-', '/', '*', '==', '!=', 'and', 'not', '=']
 arithmetics = ['+', '-', '/', '*']
@@ -160,11 +159,25 @@ def print_result():
         result['call'] -= result['def']
 
     print("[operators]")
-    N1_length = 0
     for key, value in result.items():
         print(key + ":", value)
-        N1_length += value
-    print("N1: " + str(N1_length))
+
+
+def print_halstead(N1, N2, n1, n2):
+    vocabulary = n1 + n2
+    length = N1 + N2
+    calc_length = n1 * math.log(n1, 2) + n2 * math.log(n2, 2)
+    volume = length * math.log(vocabulary, 2)
+    difficulty = ((n1 / 2) * (N2 / n2))
+    effort = difficulty * volume
+
+    print('\n[program]')
+    print('vocabulary: ', vocabulary)
+    print('volume: ', volume)
+    print('length: ', length)
+    print('calc_length: ', calc_length)
+    print('difficulty: ', difficulty)
+    print('effort: ', effort)
 
 
 # main function
@@ -179,6 +192,7 @@ def main():
             filter_token(token)
 
     print_result()
+    print_halstead(sum(n1.values()),sum(n2.values()),len(n1),len(n2))
 
 
 if __name__ == "__main__":
