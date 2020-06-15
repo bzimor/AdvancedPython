@@ -1,0 +1,25 @@
+Questions:
+
+4. Give us an intuitive explanation why the formula of estimating program length uses logarithm to base 2? Why not something else? Why base two? Why exactly logarithm? What’s the reason? Is that somehow related to how we think? Put your answer inside the answer.txt along your main.py.
+
+IThe intuitive explanation for this is because it uses binary numbers. Many algorithms work in divide and conquer manner and divide the problem into 2 in each step. Actually taking base 2 is simplified because logorithm of different bases are effective equalent when analyzing algorithm. In our example also first we tried to use two different bases: 2 and 10 fro logorithm. Resuls are as following:
+
+Base 2:
+vocabulary:  145
+volume:  2153.9727270044805
+length:  300
+calc_length:  977.9657400911501
+difficulty:  11.128787878787879
+effort:  23971.105575527134
+
+Base 10:
+vocabulary:  145
+volume:  648.4104006704923
+length:  300
+calc_length:  294.39702249916104
+difficulty:  11.128787878787879
+effort:  7216.021807461767
+
+As we can see difficulty is same regarding the base: 11,13. 
+
+Why exactly logorithm? Because logorithm is just another way of writing exponential equations that allows us to separate the exponent on one side of the equation. In computing the complexity of the problems in algorithm our complexity also might grow exponentially. So by using logorithm we can check skewness when we have big numbers and see how much mulitplicative factors are influencing. 
