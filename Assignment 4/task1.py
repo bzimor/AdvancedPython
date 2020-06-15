@@ -22,6 +22,7 @@ def filter_token(token):
     while tok:
         tok = break_token(tok)
 
+
 # parsing content inside string \" and \'
 def filter_string(text, op):
     text = text.strip()
@@ -38,6 +39,7 @@ def filter_string(text, op):
         s_start = -1
         s_end = -1
     return text
+
 
 # checking operator and keywords
 def break_token(token):
@@ -66,6 +68,7 @@ def break_token(token):
         n2[remaining_token] += 1
 
     return token[op_pos:]
+
 
 # checking comment string
 def filter_comments(sourcecode_file):
@@ -157,8 +160,11 @@ def print_result():
         result['call'] -= result['def']
 
     print("[operators]")
+    N1_length = 0
     for key, value in result.items():
         print(key + ":", value)
+        N1_length += value
+    print("N1: " + str(N1_length))
 
 
 # main function
