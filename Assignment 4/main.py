@@ -9,6 +9,7 @@ logics = ['==', '!=', 'and', 'not']
 assign = ['=']
 keywords = ['if', 'elif', 'else', 'try', 'for', 'with', 'return', 'def', 'import', 'except']
 
+filelines = []
 singleline_comment_op = "#"
 multiline_comment_start_op = "'''"
 multiline_comment_end_op = "'''"
@@ -71,12 +72,14 @@ def break_token(token):
 
 # checking comment string
 def filter_comments(sourcecode_file):
+    global filelines
     singleline_comment_op_pos = -1
     multiline_comment_start_op_pos = -1
     multiline_comment_end_op_pos = -1
     filtered_lines = []
     inside_comment = False
     for line in sourcecode_file:
+        filelines.append(line)
         if not line.strip():
             continue
         if singleline_comment_op in line:
@@ -164,13 +167,14 @@ def print_result():
 
 
 def operands():
+    global filelines
     docstring_start = False
     docstrings = 0
     inlinedocs = 0
     literals = {}
     singlequote = 0
     doublequote = 0
-    for line in fileinput.input():
+    for line in filelines:
         inlinedoc_start = False
         singlequote_start = False
         doublequote_start = False
@@ -226,8 +230,6 @@ def operands():
                 else:
                     singlequote = 0
                     templiteral += char
-                    print(line)
-                    print(templiteral)
             elif doublequote_start and not inlinedoc_start and not singlequote_start:
                 if char == '"':
                     doublequote += 1
@@ -250,11 +252,9 @@ def operands():
                 else:
                     doublequote = 0
                     templiteral += char
-                    print(line)
-                    print(templiteral)
             char_num += 1
             
-    print('[operands]')
+    print('\n[operands]')
     n2['docstrings'] = docstrings
     n2['inlinedocs'] = inlinedocs
     print('docstrings: ' + str(docstrings))
@@ -265,7 +265,6 @@ def operands():
             numliterals += v
     n2['literals'] = numliterals
     print("literals: " + str(numliterals))
-    print(literals)
 
 
 def print_halstead(N1, N2, n1, n2):

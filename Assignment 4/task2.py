@@ -3,7 +3,7 @@
 import sys
 import fileinput
 
-def main():
+def operands():
     docstring_start = False
     docstrings = 0
     inlinedocs = 0
@@ -66,8 +66,6 @@ def main():
                 else:
                     singlequote = 0
                     templiteral += char
-                    print(line)
-                    print(templiteral)
             elif doublequote_start and not inlinedoc_start and not singlequote_start:
                 if char == '"':
                     doublequote += 1
@@ -90,8 +88,6 @@ def main():
                 else:
                     doublequote = 0
                     templiteral += char
-                    print(line)
-                    print(templiteral)
             char_num += 1
             
     print('[operands]')
@@ -102,6 +98,5 @@ def main():
         for v in literals.values():
             numliterals += v
     print("literals: " + str(numliterals))
-    print(literals)
 
-main()
+operands()
