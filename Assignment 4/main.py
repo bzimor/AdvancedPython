@@ -15,6 +15,7 @@ multiline_comment_start_op = "'''"
 multiline_comment_end_op = "'''"
 n1 = {}
 n2 = {}
+result = {}
 
 
 def filter_token(token):
@@ -62,10 +63,6 @@ def break_token(token):
             else:
                 n1[keyword] += 1
 
-    if remaining_token not in n2:
-        n2[remaining_token] = 1
-    else:
-        n2[remaining_token] += 1
 
     return token[op_pos:]
 
@@ -141,7 +138,6 @@ def count_calls():
 
 # Filter and print the result
 def print_result():
-    result = {}
     for key, value in n1.items():
         key_var = key
         if key in arithmetics:
@@ -155,15 +151,16 @@ def print_result():
         result[key_var] += n1[key]
 
     # Only check the bracket, function name still be counted
-    result['call'] = count_calls()
+    result['calls'] = count_calls()
 
     # manually subtract 'function name' which is counted before in 'call'
-    if 'def' in result:
-        result['call'] -= result['def']
+    if 'def' in result and result['calls']:
+        result['calls'] -= result['def']
 
     print("[operators]")
     for key, value in result.items():
         print(key + ":", value)
+    print("N1: " + str(sum(result.values())))
 
 
 def operands():
@@ -265,6 +262,9 @@ def operands():
             numliterals += v
     n2['literals'] = numliterals
     print("literals: " + str(numliterals))
+    n2['entities'] = result['def'] + result['assign']
+    print("entities: " + str(n2['entities']))
+    print("N2: " + str(sum(n2.values())))
 
 
 def print_halstead(N1, N2, n1, n2):
