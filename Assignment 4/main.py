@@ -264,6 +264,7 @@ def operands():
     print("literals: " + str(numliterals))
     n2['entities'] = result['def'] + result['assign']
     print("entities: " + str(n2['entities']))
+    print("args: calculating... wait")
     print("N2: " + str(sum(n2.values())))
 
 
