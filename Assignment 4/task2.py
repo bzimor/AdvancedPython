@@ -63,6 +63,11 @@ def break_token(token):
             else:
                 n1[keyword] += 1
 
+    if remaining_token not in n2:
+        n2[remaining_token] = 1
+    else:
+        n2[remaining_token] += 1
+
     return token[op_pos:]
 
 
@@ -164,6 +169,7 @@ def print_result():
 
 # checking the number of operands
 def operands():
+    n2 = dict()
     global filelines
     docstring_start = False
     docstrings = 0
