@@ -9,11 +9,13 @@ logics = ['==', '!=', 'and', 'not']
 assign = ['=']
 keywords = ['if', 'elif', 'else', 'try', 'for', 'with', 'return', 'def', 'import', 'except']
 
+filelines = []
 singleline_comment_op = "#"
 multiline_comment_start_op = "'''"
 multiline_comment_end_op = "'''"
 n1 = {}
 n2 = {}
+result = {}
 
 
 def filter_token(token):
@@ -61,22 +63,19 @@ def break_token(token):
             else:
                 n1[keyword] += 1
 
-    if remaining_token not in n2:
-        n2[remaining_token] = 1
-    else:
-        n2[remaining_token] += 1
-
     return token[op_pos:]
 
 
 # checking comment string
 def filter_comments(sourcecode_file):
+    global filelines
     singleline_comment_op_pos = -1
     multiline_comment_start_op_pos = -1
     multiline_comment_end_op_pos = -1
     filtered_lines = []
     inside_comment = False
     for line in sourcecode_file:
+        filelines.append(line)
         if not line.strip():
             continue
         if singleline_comment_op in line:
@@ -138,7 +137,6 @@ def count_calls():
 
 # Filter and print the result
 def print_result():
-    result = {}
     for key, value in n1.items():
         key_var = key
         if key in arithmetics:
@@ -152,17 +150,132 @@ def print_result():
         result[key_var] += n1[key]
 
     # Only check the bracket, function name still be counted
-    result['call'] = count_calls()
+    result['calls'] = count_calls()
 
     # manually subtract 'function name' which is counted before in 'call'
-    if 'def' in result:
-        result['call'] -= result['def']
+    if 'def' in result and result['calls']:
+        result['calls'] -= result['def']
 
     print("[operators]")
     for key, value in result.items():
         print(key + ":", value)
+    print("N1: " + str(sum(result.values())))
 
 
+# checking the number of operands
+def operands():
+    global filelines
+    docstring_start = False
+    docstrings = 0
+    inlinedocs = 0
+    literals = {}
+    singlequote = 0
+    doublequote = 0
+    for line in filelines:
+        inlinedoc_start = False
+        singlequote_start = False
+        doublequote_start = False
+        templiteral = ''
+        tempdigit = ''
+        char_num = 1
+        for char in line:
+            if not inlinedoc_start and not singlequote_start and not doublequote_start:
+                if char == "'":
+                    singlequote = 1
+                    doublequote = 0
+                    singlequote_start = True
+                    templiteral = ''
+                    tempdigit = ''
+                elif char == '"':
+                    doublequote = 1
+                    singlequote = 0
+                    doublequote_start = True
+                    templiteral = ''
+                    tempdigit = ''
+                elif char == "#":
+                    inlinedocs += 1
+                    inlinedoc_start = True
+                    templiteral = ''
+                    tempdigit = ''
+                elif char.isnumeric():
+                    tempdigit += char
+                else:
+                    if tempdigit:
+                        if tempdigit not in literals.keys():
+                            literals[tempdigit] = 0
+                        literals[tempdigit] += 1
+                    tempdigit = ''
+            elif singlequote_start and not inlinedoc_start and not doublequote_start:
+                if char == "'":
+                    singlequote += 1
+                    if singlequote == 3:
+                        singlequote_start = False
+                        if not docstring_start:
+                            docstring_start = True
+                            docstrings += 1
+                        else:
+                            docstring_start = False
+                        singlequote = 0
+                    elif singlequote == 2:
+                        pass
+                    else:
+                        if templiteral not in literals.keys():
+                            literals[templiteral] = 0
+                        literals[templiteral] += 1
+                        singlequote_start = False
+                        templiteral = ''
+                else:
+                    singlequote = 0
+                    templiteral += char
+            elif doublequote_start and not inlinedoc_start and not singlequote_start:
+                if char == '"':
+                    doublequote += 1
+                    if doublequote == 3:
+                        doublequote_start = False
+                        if not docstring_start:
+                            docstring_start = True
+                            docstrings += 1
+                        else:
+                            docstring_start = False
+                        doublequote = 0
+                    elif doublequote == 2:
+                        pass
+                    else:
+                        if templiteral not in literals.keys():
+                            literals[templiteral] = 0
+                        literals[templiteral] += 1
+                        doublequote_start = False
+                        templiteral = ''
+                else:
+                    doublequote = 0
+                    templiteral += char
+            char_num += 1
+
+    print('\n[operands]')
+    n2['docstrings'] = docstrings
+    n2['inlinedocs'] = inlinedocs
+    print('docstrings: ' + str(docstrings))
+    print('inlinedocs: ' + str(inlinedocs))
+    numliterals = 0
+    if literals:
+        for v in literals.values():
+            numliterals += v
+    n2['literals'] = numliterals
+    print("literals: " + str(numliterals))
+
+    # anticipate if the value is 0
+    if 'def' not in result:
+        result['def'] = 0
+    if 'assign' not in result:
+        result['assign'] = 0
+
+    n2['entities'] = result['def'] + result['assign']
+    print("entities: " + str(n2['entities']))
+    print("args: calculating... wait")
+    print("N2: " + str(sum(n2.values())))
+
+
+# calculated and print halstead estimation
 def print_halstead(N1, N2, n1, n2):
     vocabulary = n1 + n2
     length = N1 + N2
@@ -192,7 +305,8 @@ def main():
             filter_token(token)
 
     print_result()
-    print_halstead(sum(n1.values()),sum(n2.values()),len(n1),len(n2))
+    operands()
+    print_halstead(sum(n1.values()), sum(n2.values()), len(n1), len(n2))
 
 
 if __name__ == "__main__":
