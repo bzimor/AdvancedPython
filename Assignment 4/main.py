@@ -63,7 +63,6 @@ def break_token(token):
             else:
                 n1[keyword] += 1
 
-
     return token[op_pos:]
 
 
@@ -163,6 +162,7 @@ def print_result():
     print("N1: " + str(sum(result.values())))
 
 
+# checking the number of operands
 def operands():
     global filelines
     docstring_start = False
@@ -250,7 +250,7 @@ def operands():
                     doublequote = 0
                     templiteral += char
             char_num += 1
-            
+
     print('\n[operands]')
     n2['docstrings'] = docstrings
     n2['inlinedocs'] = inlinedocs
@@ -262,12 +262,20 @@ def operands():
             numliterals += v
     n2['literals'] = numliterals
     print("literals: " + str(numliterals))
+
+    # anticipate if the value is 0
+    if 'def' not in result:
+        result['def'] = 0
+    if 'assign' not in result:
+        result['assign'] = 0
+
     n2['entities'] = result['def'] + result['assign']
     print("entities: " + str(n2['entities']))
     print("args: calculating... wait")
     print("N2: " + str(sum(n2.values())))
 
 
+# calculated and print halstead estimation
 def print_halstead(N1, N2, n1, n2):
     vocabulary = n1 + n2
     length = N1 + N2
@@ -298,7 +306,7 @@ def main():
 
     print_result()
     operands()
-    print_halstead(sum(n1.values()),sum(n2.values()),len(n1),len(n2))
+    print_halstead(sum(n1.values()), sum(n2.values()), len(n1), len(n2))
 
 
 if __name__ == "__main__":
