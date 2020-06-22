@@ -1,6 +1,7 @@
 from functools import wraps
 
 from fpdf import FPDF
+from PyPDF2 import PdfFileMerger, PdfFileReader
 
 import inspect
 import os
@@ -25,6 +26,9 @@ n1 = {}
 n2 = {}
 result = {}
 
+gl_multipage = False
+final_report_filename = 'final_report.pdf'
+filesize = 'A4'
 
 def __filter_token__(token):
     tok = token
@@ -423,12 +427,7 @@ def calculate_complexity(func, *args, **kwargs):
     return complexity_result
 
 def report_complexity(func):
-    # canvas = Canvas("report_complexity.pdf", pagesize=LETTER)
-    # t = canvas.beginText()
-    # t.setFont('Helvetica', 10)
-    # t.setCharSpace(4)
-    # t.setTextOrigin(50, 600)
-
+   
     @wraps(func)
     def wrapper(*args, **kwargs):
         merged_result = calculate_complexity(func, *args, **kwargs)
@@ -438,10 +437,6 @@ def report_complexity(func):
             result_str += i + ',\n'
             result_str += '  },\n'
 
-        # t.textLines(result_str)
-        # canvas.drawText(t)
-        # canvas.showPage()
-        # canvas.save()  
         return func
     return wrapper
 
@@ -451,28 +446,14 @@ def report_object(func):
     pdf.add_page()
     pdf.set_font("Arial", size=12)
 
-
-    # canvas = Canvas("report_object.pdf", pagesize=LETTER)
-    # t = canvas.beginText()
-    # t.setFont('Helvetica', 10)
-    # t.setCharSpace(3)
-    # t.setTextOrigin(50, 700)
-
     @wraps(func)
     def wrapper(*args, **kwargs):
+        global gl_multipage
+
         merged_result = calculate_object(func, *args, **kwargs)
         result_str = ''
         index = 1
-        # for i in merged_result:
-        #     result_str += '  {\n'
-        #     for key, value in i.items():
-        #         result_str = '   '+str(key)+' : ' +str(value)+',\n'
-        #         pdf.cell(200, 10, txt=result_str, ln=index, align="L")
-        #         index += 1
-        #     result_str = '  },\n'
-        #     pdf.cell(200, 10, txt=result_str, ln=index, align="L")
-        #     index += 1
-        
+    
 
         pdf.cell(200, 10, txt='{', ln=index, align="L")
         index += 1
@@ -497,17 +478,11 @@ def report_object(func):
             index += 1
         pdf.cell(200, 10, txt='},', ln=index, align="L")
 
-
-        # pdf.cell(200, 10, txt=result_str, ln=1, align="L")
-        # pdf.cell(200, 10, txt="Anjas", ln=2, align="L")
         
         pdf.output("report_object.pdf")
-
-        # t.textLines(result_str)
-        # canvas.drawText(t)
-        # canvas.showPage()
-        # # func(*args, **kwargs)
-        # canvas.save()
+        
+        if gl_multipage:
+            page_merger("report_object.pdf", 'report_complexity.pdf')
 
     return wrapper
 
@@ -529,3 +504,23 @@ def generate_plot(final_result):
 
         plt.savefig('report_complexity.pdf')
 
+
+def rc(multipage, filename, papersize):
+    global gl_multipage
+    global final_report_filename
+    global filesize
+
+    gl_multipage = multipage
+    final_report_filename = filename
+    filesize = papersize
+
+def page_merger(filename1, filename2):
+    global final_report_filename
+
+    merger = PdfFileMerger()
+    file1 = open(filename1, 'rb')
+    file2 = open(filename2, 'rb')
+    merger.append(PdfFileReader(file1))
+    merger.append(PdfFileReader(file2))
+
+    merger.write(final_report_filename)
