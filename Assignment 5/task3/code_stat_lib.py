@@ -528,5 +528,5 @@ def generate_plot(final_result):
         ax.set_xticks(ind)
         ax.set_xticklabels(('Vocabulary', 'Length', 'Volume', 'Difficulty', 'Effort'))
 
-        plt.savefig('report_complexity.pdf.pdf')
+        plt.savefig('report_complexity.pdf')
 
