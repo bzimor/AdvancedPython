@@ -3,6 +3,7 @@ from code_stat_lib import *
 
 @report_object
 @report_complexity
+
 def foo(z, x):
     '''
     another dummy comment

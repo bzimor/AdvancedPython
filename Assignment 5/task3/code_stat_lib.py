@@ -422,21 +422,31 @@ def calculate_complexity(func, *args, **kwargs):
 
 def report_complexity(func):
     canvas = Canvas("report_complexity.pdf", pagesize=LETTER)
+    t = canvas.beginText()
+    t.setFont('Helvetica', 10)
+    t.setCharSpace(4)
+    t.setTextOrigin(50, 600)
 
     @wraps(func)
     def wrapper(*args, **kwargs):
         merged_result = calculate_complexity(func, *args, **kwargs)
+        result_str = ''
+        for i in merged_result:
+            result_str += '  {\n'
+            result_str += i + ',\n'
+            result_str += '  },\n'
 
-        # print_result(merged_result)
-        canvas.drawString(1 * inch, 10 * inch, str(merged_result))
-        canvas.save()
+        t.textLines(result_str)
+        canvas.drawText(t)
+        canvas.showPage()
+        canvas.save()  
         return func
     return wrapper
 
 def report_object(func):
     canvas = Canvas("report_object.pdf", pagesize=LETTER)
     t = canvas.beginText()
-    t.setFont('Helvetica-Bold', 10)
+    t.setFont('Helvetica', 10)
     t.setCharSpace(3)
     t.setTextOrigin(50, 700)
 
@@ -450,11 +460,10 @@ def report_object(func):
 
                 result_str += '   '+str(key)+' : ' +str(value)+',\n'
             result_str += '  },\n'
-        # print_result(merged_result)
 
         t.textLines(result_str)
         canvas.drawText(t)
         canvas.showPage()
-        # canvas.drawString(1 * inch, 10 * inch, )
+        # func(*args, **kwargs)
         canvas.save()
     return wrapper
