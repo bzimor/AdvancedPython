@@ -1,7 +1,6 @@
 from functools import wraps
-from reportlab.pdfgen.canvas import Canvas
-from reportlab.lib.pagesizes import LETTER
-from reportlab.lib.units import inch, cm
+
+from fpdf import FPDF
 
 import inspect
 import os
@@ -421,11 +420,11 @@ def calculate_complexity(func, *args, **kwargs):
     return complexity_result
 
 def report_complexity(func):
-    canvas = Canvas("report_complexity.pdf", pagesize=LETTER)
-    t = canvas.beginText()
-    t.setFont('Helvetica', 10)
-    t.setCharSpace(4)
-    t.setTextOrigin(50, 600)
+    # canvas = Canvas("report_complexity.pdf", pagesize=LETTER)
+    # t = canvas.beginText()
+    # t.setFont('Helvetica', 10)
+    # t.setCharSpace(4)
+    # t.setTextOrigin(50, 600)
 
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -436,34 +435,75 @@ def report_complexity(func):
             result_str += i + ',\n'
             result_str += '  },\n'
 
-        t.textLines(result_str)
-        canvas.drawText(t)
-        canvas.showPage()
-        canvas.save()  
+        # t.textLines(result_str)
+        # canvas.drawText(t)
+        # canvas.showPage()
+        # canvas.save()  
         return func
     return wrapper
 
 def report_object(func):
-    canvas = Canvas("report_object.pdf", pagesize=LETTER)
-    t = canvas.beginText()
-    t.setFont('Helvetica', 10)
-    t.setCharSpace(3)
-    t.setTextOrigin(50, 700)
+
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+
+
+    # canvas = Canvas("report_object.pdf", pagesize=LETTER)
+    # t = canvas.beginText()
+    # t.setFont('Helvetica', 10)
+    # t.setCharSpace(3)
+    # t.setTextOrigin(50, 700)
 
     @wraps(func)
     def wrapper(*args, **kwargs):
         merged_result = calculate_object(func, *args, **kwargs)
         result_str = ''
+        index = 1
+        # for i in merged_result:
+        #     result_str += '  {\n'
+        #     for key, value in i.items():
+        #         result_str = '   '+str(key)+' : ' +str(value)+',\n'
+        #         pdf.cell(200, 10, txt=result_str, ln=index, align="L")
+        #         index += 1
+        #     result_str = '  },\n'
+        #     pdf.cell(200, 10, txt=result_str, ln=index, align="L")
+        #     index += 1
+        
+
+        pdf.cell(200, 10, txt='{', ln=index, align="L")
+        index += 1
+
         for i in merged_result:
-            result_str += '  {\n'
+            pdf.cell(200, 10, txt='  {', ln=index, align="L")
+            index += 1
             for key, value in i.items():
+                check_list = str(value).split('\n')
+                if len(check_list) > 1:
+                    for ix, t in enumerate(check_list):
+                        if ix == 0:
+                            pdf.cell(200, 10, txt='   ' + str(key) + ' : ' + str(t) + ',', ln=index, align="L")
+                        else:
+                            pdf.cell(200, 10, str(t) + ',', ln=index, align="L")                            
+                        index += 1
+                else:
+                    pdf.cell(200, 10, txt='   ' + str(key) + ' : ' + str(value) + ',', ln=index, align="L")
+                    index += 1
 
-                result_str += '   '+str(key)+' : ' +str(value)+',\n'
-            result_str += '  },\n'
+            pdf.cell(200, 10, txt='  },', ln=index, align="L")
+            index += 1
+        pdf.cell(200, 10, txt='},', ln=index, align="L")
 
-        t.textLines(result_str)
-        canvas.drawText(t)
-        canvas.showPage()
-        # func(*args, **kwargs)
-        canvas.save()
+
+        # pdf.cell(200, 10, txt=result_str, ln=1, align="L")
+        # pdf.cell(200, 10, txt="Anjas", ln=2, align="L")
+        
+        pdf.output("report_object.pdf")
+
+        # t.textLines(result_str)
+        # canvas.drawText(t)
+        # canvas.showPage()
+        # # func(*args, **kwargs)
+        # canvas.save()
+
     return wrapper
