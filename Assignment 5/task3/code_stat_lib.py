@@ -9,6 +9,9 @@ import sys, io
 import fileinput
 import math
 
+import numpy as np
+import matplotlib.pyplot as plt
+
 operators = ['+', '-', '/', '*', '==', '!=', 'and', 'not', '=']
 arithmetics = ['+', '-', '/', '*']
 logics = ['==', '!=', 'and', 'not']
@@ -427,6 +430,7 @@ def report_complexity(func):
     def wrapper(*args, **kwargs):
         merged_result = calculate_complexity(func, *args, **kwargs)
 
+        generate_plot(merged_result)
         # print_result(merged_result)
         canvas.drawString(1 * inch, 10 * inch, str(merged_result))
         canvas.save()
@@ -458,3 +462,21 @@ def report_object(func):
         # canvas.drawString(1 * inch, 10 * inch, )
         canvas.save()
     return wrapper
+
+
+def generate_plot(final_result):
+    if 'program' in final_result:
+        indicators = tuple(final_result['program'].values())
+            
+        ind = np.arange(len(indicators))
+        width = 0.35 
+
+        fig, ax = plt.subplots()
+        rects1 = ax.bar(ind, indicators, width,
+                        color='Red', label='Indicators')
+        ax.set_ylabel('Indicators')
+        ax.set_title('Complexity of the code')
+        ax.set_xticks(ind)
+        ax.set_xticklabels(('Vocabulary', 'Length', 'Volume', 'Difficulty', 'Effort'))
+
+        plt.savefig('line_plot.pdf')
