@@ -345,7 +345,7 @@ def stat_object(func):
         for i in result:
             print('  {')
             for key, value in i.items():
-                print('   ',key,' : ', value,',')
+                print('   ', key, ' : ', value, ',')
             print('  },')
         print('}')
 
@@ -357,6 +357,7 @@ def stat_object(func):
         # print_result(merged_result)
 
     return wrapper
+
 
 def calculate_object(func, *args, **kwargs):
     def get_doc(source):
@@ -374,7 +375,7 @@ def calculate_object(func, *args, **kwargs):
     result_stat_object = dict()
 
     # prev_result = func(*args, **kwargs)
-    source = func 
+    source = func
 
     result_stat_object['Name'] = source.__name__
     result_stat_object['Type'] = type(source)
@@ -405,6 +406,7 @@ def calculate_object(func, *args, **kwargs):
 
     return merged_result
 
+
 def calculate_complexity(func, *args, **kwargs):
     source_code = inspect.getsource(func)
     lines = __filter_comments__(source_code)
@@ -419,16 +421,11 @@ def calculate_complexity(func, *args, **kwargs):
     complexity_result['operators'] = __get_operators__()
     complexity_result['operands'] = __get_operands__()
     complexity_result['program'] = __get_halstead__(sum(n1.values()), sum(n2.values()), len(n1), len(n2))
-    generate_plot(complexity_result)
+    generate_plot(complexity_result, str(func.__name__))
     return complexity_result
 
-def report_complexity(func):
-    # canvas = Canvas("report_complexity.pdf", pagesize=LETTER)
-    # t = canvas.beginText()
-    # t.setFont('Helvetica', 10)
-    # t.setCharSpace(4)
-    # t.setTextOrigin(50, 600)
 
+def report_complexity(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         merged_result = calculate_complexity(func, *args, **kwargs)
@@ -437,42 +434,21 @@ def report_complexity(func):
             result_str += '  {\n'
             result_str += i + ',\n'
             result_str += '  },\n'
-
-        # t.textLines(result_str)
-        # canvas.drawText(t)
-        # canvas.showPage()
-        # canvas.save()  
         return func
+
     return wrapper
 
-def report_object(func):
 
+def report_object(func):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
-
-
-    # canvas = Canvas("report_object.pdf", pagesize=LETTER)
-    # t = canvas.beginText()
-    # t.setFont('Helvetica', 10)
-    # t.setCharSpace(3)
-    # t.setTextOrigin(50, 700)
 
     @wraps(func)
     def wrapper(*args, **kwargs):
         merged_result = calculate_object(func, *args, **kwargs)
         result_str = ''
         index = 1
-        # for i in merged_result:
-        #     result_str += '  {\n'
-        #     for key, value in i.items():
-        #         result_str = '   '+str(key)+' : ' +str(value)+',\n'
-        #         pdf.cell(200, 10, txt=result_str, ln=index, align="L")
-        #         index += 1
-        #     result_str = '  },\n'
-        #     pdf.cell(200, 10, txt=result_str, ln=index, align="L")
-        #     index += 1
-        
 
         pdf.cell(200, 10, txt='{', ln=index, align="L")
         index += 1
@@ -487,7 +463,7 @@ def report_object(func):
                         if ix == 0:
                             pdf.cell(200, 10, txt='   ' + str(key) + ' : ' + str(t) + ',', ln=index, align="L")
                         else:
-                            pdf.cell(200, 10, str(t) + ',', ln=index, align="L")                            
+                            pdf.cell(200, 10, str(t) + ',', ln=index, align="L")
                         index += 1
                 else:
                     pdf.cell(200, 10, txt='   ' + str(key) + ' : ' + str(value) + ',', ln=index, align="L")
@@ -497,27 +473,17 @@ def report_object(func):
             index += 1
         pdf.cell(200, 10, txt='},', ln=index, align="L")
 
-
-        # pdf.cell(200, 10, txt=result_str, ln=1, align="L")
-        # pdf.cell(200, 10, txt="Anjas", ln=2, align="L")
-        
-        pdf.output("report_object.pdf")
-
-        # t.textLines(result_str)
-        # canvas.drawText(t)
-        # canvas.showPage()
-        # # func(*args, **kwargs)
-        # canvas.save()
+        pdf.output(str(func.__name__) + "_object.pdf")
 
     return wrapper
 
 
-def generate_plot(final_result):
+def generate_plot(final_result, func_name):
     if 'program' in final_result:
         indicators = tuple(final_result['program'].values())
-            
+
         ind = np.arange(len(indicators))
-        width = 0.35 
+        width = 0.35
 
         fig, ax = plt.subplots()
         rects1 = ax.bar(ind, indicators, width,
@@ -527,5 +493,4 @@ def generate_plot(final_result):
         ax.set_xticks(ind)
         ax.set_xticklabels(('Vocabulary', 'Length', 'Volume', 'Difficulty', 'Effort'))
 
-        plt.savefig('report_complexity.pdf')
-
+        plt.savefig(func_name + '_complexity.pdf')

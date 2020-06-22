@@ -30,6 +30,7 @@ gl_multipage = False
 final_report_filename = 'final_report.pdf'
 filesize = 'A4'
 
+
 def __filter_token__(token):
     tok = token
     while tok:
@@ -349,7 +350,7 @@ def stat_object(func):
         for i in result:
             print('  {')
             for key, value in i.items():
-                print('   ',key,' : ', value,',')
+                print('   ', key, ' : ', value, ',')
             print('  },')
         print('}')
 
@@ -361,6 +362,7 @@ def stat_object(func):
         # print_result(merged_result)
 
     return wrapper
+
 
 def calculate_object(func, *args, **kwargs):
     def get_doc(source):
@@ -378,7 +380,7 @@ def calculate_object(func, *args, **kwargs):
     result_stat_object = dict()
 
     # prev_result = func(*args, **kwargs)
-    source = func 
+    source = func
 
     result_stat_object['Name'] = source.__name__
     result_stat_object['Type'] = type(source)
@@ -409,6 +411,7 @@ def calculate_object(func, *args, **kwargs):
 
     return merged_result
 
+
 def calculate_complexity(func, *args, **kwargs):
     source_code = inspect.getsource(func)
     lines = __filter_comments__(source_code)
@@ -423,11 +426,11 @@ def calculate_complexity(func, *args, **kwargs):
     complexity_result['operators'] = __get_operators__()
     complexity_result['operands'] = __get_operands__()
     complexity_result['program'] = __get_halstead__(sum(n1.values()), sum(n2.values()), len(n1), len(n2))
-    generate_plot(complexity_result)
+    generate_plot(complexity_result, str(func.__name__))
     return complexity_result
 
+
 def report_complexity(func):
-   
     @wraps(func)
     def wrapper(*args, **kwargs):
         merged_result = calculate_complexity(func, *args, **kwargs)
@@ -438,10 +441,11 @@ def report_complexity(func):
             result_str += '  },\n'
 
         return func
+
     return wrapper
 
-def report_object(func):
 
+def report_object(func):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
@@ -453,7 +457,6 @@ def report_object(func):
         merged_result = calculate_object(func, *args, **kwargs)
         result_str = ''
         index = 1
-    
 
         pdf.cell(200, 10, txt='{', ln=index, align="L")
         index += 1
@@ -468,7 +471,7 @@ def report_object(func):
                         if ix == 0:
                             pdf.cell(200, 10, txt='   ' + str(key) + ' : ' + str(t) + ',', ln=index, align="L")
                         else:
-                            pdf.cell(200, 10, str(t) + ',', ln=index, align="L")                            
+                            pdf.cell(200, 10, str(t) + ',', ln=index, align="L")
                         index += 1
                 else:
                     pdf.cell(200, 10, txt='   ' + str(key) + ' : ' + str(value) + ',', ln=index, align="L")
@@ -478,21 +481,20 @@ def report_object(func):
             index += 1
         pdf.cell(200, 10, txt='},', ln=index, align="L")
 
-        
-        pdf.output("report_object.pdf")
-        
+        pdf.output(str(func.__name__) + "_object.pdf")
+
         if gl_multipage:
-            page_merger("report_object.pdf", 'report_complexity.pdf')
+            page_merger(str(func.__name__) + "_object.pdf", str(func.__name__) + '_complexity.pdf')
 
     return wrapper
 
 
-def generate_plot(final_result):
+def generate_plot(final_result, func_name):
     if 'program' in final_result:
         indicators = tuple(final_result['program'].values())
-            
+
         ind = np.arange(len(indicators))
-        width = 0.35 
+        width = 0.35
 
         fig, ax = plt.subplots()
         rects1 = ax.bar(ind, indicators, width,
@@ -502,7 +504,7 @@ def generate_plot(final_result):
         ax.set_xticks(ind)
         ax.set_xticklabels(('Vocabulary', 'Length', 'Volume', 'Difficulty', 'Effort'))
 
-        plt.savefig('report_complexity.pdf')
+        plt.savefig(func_name + '_complexity.pdf')
 
 
 def rc(multipage, filename, papersize):
@@ -513,6 +515,7 @@ def rc(multipage, filename, papersize):
     gl_multipage = multipage
     final_report_filename = filename
     filesize = papersize
+
 
 def page_merger(filename1, filename2):
     global final_report_filename
