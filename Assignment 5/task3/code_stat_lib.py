@@ -1,6 +1,7 @@
 from functools import wraps
 
 from fpdf import FPDF
+from PyPDF2 import PdfFileMerger, PdfFileReader
 
 import inspect
 import os
@@ -527,4 +528,5 @@ def generate_plot(final_result):
         ax.set_xticks(ind)
         ax.set_xticklabels(('Vocabulary', 'Length', 'Volume', 'Difficulty', 'Effort'))
 
-        plt.savefig('line_plot.pdf')
+        plt.savefig('report_complexity.pdf.pdf')
+
