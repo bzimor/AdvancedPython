@@ -149,54 +149,98 @@ class check_pattern:
         expect_close_bracket_1 = False
         expect_close_bracket_2 = False
         got_minus = False
+        got_operator = False
+        got_number = False
 
         for key, char in enumerate(self.expression):
             if char in '0123456789':
-                if key + 1 == len(self.expression):
-                    return True
-                if self.peek(key) in '-+([':
+                if got_operator:
+                    got_operator = False
+
+                if got_number:
                     return False
+
+                if key + 1 == len(self.expression):
+                    pass
+                elif self.peek(key) in '-+([':
+                    return False
+                elif self.peek(key) == ' ':
+                    got_number = True
             elif char == '+':
+                if got_operator:
+                    return False
+
+                if got_number:
+                    got_number = False
+
                 if self.peek(key) == ' ':
+                    got_operator = True
                     pass
                 else:
                     return False
             elif char == '-':
                 got_minus = True
+                if got_operator:
+                    return False
+
                 if self.peek(key) in '0123456789':
+                    if got_number:
+                        return False
+                    pass
+                elif self.peek(key) == ' ':
+                    got_operator = True
+                    if got_number:
+                        got_number = False
                     pass
                 else:
                     return False
+
             elif char == '[':
                 expect_close_bracket_1 = True
             elif char == ']':
                 if not expect_close_bracket_1:
                     return False
                 expect_close_bracket_1 = False
-                if self.peek(key) == ' ':
+                if key + 1 == len(self.expression):
                     pass
                 else:
-                    return False
+                    if self.peek(key) == ' ':
+                        pass
+                    elif self.peek(key) == ')':
+                        pass
+                    else:
+                        return False
             elif char == '(':
                 if self.peek(key) in '-0123456789':
                     expect_close_bracket_2 = True
                     pass
+                elif self.peek(key) == '[':
+                    expect_close_bracket_2 = True
+                    expect_close_bracket_1 = True
+                    pass
                 else:
                     return False
+
             elif char == ')':
                 if not expect_close_bracket_2:
                     return False
                 expect_close_bracket_2 = False
-                if self.peek(key) == ' ':
+                if key + 1 == len(self.expression):
                     pass
                 else:
-                    return False
+                    if self.peek(key) == ' ':
+                        pass
+                    else:
+                        return False
             elif char == ' ':
                 got_minus = False
             else:
                 if key == len(self.expression):
                     pass
                 return False
+
+        if expect_close_bracket_1 or expect_close_bracket_2:
+            return False
 
         if expect_close_bracket_1 == False and expect_close_bracket_2 == False:
             return True
@@ -208,8 +252,8 @@ def main():
 
     def evaluate(expression):
         correct_pattern = True
-        # checker = check_pattern(expression)
-        # correct_pattern = checker.check()
+        checker = check_pattern(expression)
+        correct_pattern = checker.check()
         if correct_pattern:
             try:
                 p.set_value(expression)
