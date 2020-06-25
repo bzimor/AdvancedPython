@@ -71,7 +71,7 @@ class Parser:
                 denominator = self.parseParenthesis()
                 if denominator == 0:
                     raise Exception('error')
-                values.append(1.0 / denominator)
+                values.append('/'+str(denominator))
             else:
                 break
         value = 0
@@ -80,6 +80,15 @@ class Parser:
             if kkey == 0:
                 first_val = factor
                 value = factor
+            elif type(factor) is str:
+                number_factor = int(factor[1:])
+                check_value = value
+                count = 0
+                while check_value > 0:
+                    check_value -= number_factor
+                    if check_value >= 0:
+                        count += 1
+                value = count
             else:
                 for i in range(factor-1):
                     
