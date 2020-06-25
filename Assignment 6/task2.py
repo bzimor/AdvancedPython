@@ -1,110 +1,237 @@
-# python -V 3.8
-import sys
-import operator
+class Parser:
+    def __init__(self):
+        self.string = ''
+        self.index = 0
+        self.saved_result = []
 
+    def set_value(self, string):
+        self.string = string
 
-class ATree:
-    def __init__(self, val):
-        self.value = val
-        self.left_child = None
-        self.right_child = None
+    def getValue(self):
+        value = self.parseExpression()
+        self.skipWhitespace()
+        if self.hasNext():
+            raise Exception(
+                "Unexpected character found: '" +
+                self.peek() +
+                "' at index " +
+                str(self.index))
 
-    def set_val(self, val):
-        self.value = val
+        self.saved_result.append(value)
+        return len(self.saved_result)-1, value
 
-    def set_left(self, val):
-        self.left_child = ATree(val)
+    def peek(self):
+        return self.string[self.index:self.index + 1]
 
-    def set_right(self, val):
-        self.right_child = ATree(val)
+    def hasNext(self):
+        return self.index < len(self.string)
 
+    def skipWhitespace(self):
+        while self.hasNext():
+            if self.peek() in ' \t\n\r':
+                self.index += 1
+            else:
+                return
 
-class Cas:
-    """
-    Please always separate number and operator with space
-    Example: 37 + -31, 1 - 20
+    def parseExpression(self):
+        return self.parseAddition()
 
-    Use 'exit' command to close the program
-    """
+    def parseAddition(self):
+        values = [self.parseParenthesis()]
+        while True:
+            self.skipWhitespace()
+            char = self.peek()
+            if char == '+':
+                self.index += 1
+                values.append(self.parseParenthesis())
+            elif char == '-':
+                self.index += 1
+                values.append(-1 * self.parseParenthesis())
+            else:
+                break
 
-    def __init__(self, arguments=""):
-        if len(arguments) > 0 and arguments[0] == '-h':
-            print(self.__doc__)
+        result = 0
+        for v in values:
+            result += v
+        return result
+
+    def parseParenthesis(self):
+        self.skipWhitespace()
+        char = self.peek()
+        if char == '(':
+            self.index += 1
+            value = self.parseExpression()
+            self.skipWhitespace()
+            if self.peek() != ')':
+                raise Exception("err: invalid parenthesis")
+            self.index += 1
+            return value
         else:
-            self.__saved_result__ = []
-            self.__run_cas__()
+            return self.parseNegative()
 
-    def __run_cas__(self):
-        keep_looping = True
-
-        while keep_looping:
-            try:
-                command = input("\n>> ")
-                if command == 'exit':
-                    keep_looping = False
-                elif command != '':
-                    tree = self.__parse_input__(command)
-                    if tree is not None:
-                        result = self.__eval_result__(tree)
-                        self.__saved_result__.append(result)
-                        print(len(self.__saved_result__), ':', result)
-            except EOFError:
-                keep_looping = False
-
-    def __parse_input__(self, command):
-        tokens = command.split(' ')
-        tokens.reverse()
-        p_stack = []
-        parse_tree = ATree('')
-        p_stack.append(parse_tree)
-        current_node = parse_tree
-
-        first_time = True
-        for index, val in enumerate(tokens):
-            if val == '(':
-                current_node.set_left('')
-                p_stack.append(current_node)
-                current_node = current_node.left_child
-            elif val in ['+', '-']:
-                current_node.set_val(val)
-                current_node.set_right('')
-                current_node = current_node.right_child
-            elif val == ')':
-                current_node = p_stack.pop()
-            elif val not in ['+', '-', ')']:
-                try:
-                    if first_time:
-                        current_node.set_left(int(val))
-                        first_time = False
-                        parent = p_stack.pop()
-                        current_node = parent
-                    else:
-                        if index == len(tokens)-1:
-                            current_node.set_val(int(val))
-                        else:
-                            current_node.set_left(int(val))
-                except ValueError:
-                    print('err: invalid number')
-                    return None
-
-        return parse_tree
-
-    def __eval_result__(self, tree):
-        op = {'+': operator.add, '-': operator.sub}
-
-        left_child = tree.left_child
-        right_child = tree.right_child
-
-        if left_child is not None and right_child is not None:
-            fn = op[tree.value]
-            return fn(self.__eval_result__(right_child), self.__eval_result__(left_child))
+    def parseNegative(self):
+        self.skipWhitespace()
+        char = self.peek()
+        if char == '-':
+            self.index += 1
+            return -1 * self.parseParenthesis()
         else:
-            return tree.value
+            return self.parseValue()
+
+    def parseValue(self):
+        self.skipWhitespace()
+        char = self.peek()
+        if char in '0123456789.':
+            return self.parseNumber()
+        elif char == '[':
+            return self.parseSavedValue()
+        else:
+            raise Exception('err: invalid number')
+
+    def parseSavedValue(self):
+        self.skipWhitespace()
+        str_value = None
+        char = ''
+
+        while self.hasNext():
+            char = self.peek()
+            if char == ']':
+                break
+            elif char in '0123456789':
+                str_value += char
+            else:
+                raise Exception('err: invalid Exception')
+            self.index += 1
+        try:
+            index_value = int(str_value)
+        except:
+            raise Exception('err: invalid index')
+
+        return self.saved_result[index_value]
+
+    def parseNumber(self):
+        self.skipWhitespace()
+        strValue = ''
+        char = ''
+
+        while self.hasNext():
+            char = self.peek()
+            if char == '.':
+                raise Exception('invalid integer')
+            elif char in '0123456789':
+                strValue += char
+            else:
+                break
+            self.index += 1
+
+        if len(strValue) == 0:
+            if char == '':
+                raise Exception("err: invalid expression")
+            else:
+                raise Exception("err: invalid character")
+
+        return int(strValue)
+
+
+class check_pattern:
+    def __init__(self, expression):
+        self.expression = expression
+        self.index = 0
+
+    def peek(self, i):
+        i += 1
+        return self.expression[i:i + 1]
+
+    def check(self):
+        expect_close_bracket_1 = False
+        expect_close_bracket_2 = False
+        got_minus = False
+
+        for key, char in enumerate(self.expression):
+            if char in '0123456789':
+                if key + 1 == len(self.expression):
+                    return True
+                if self.peek(key) in '-+([':
+                    return False
+            elif char == '+':
+                if self.peek(key) == ' ':
+                    pass
+                else:
+                    return False
+            elif char == '-':
+                got_minus = True
+                if self.peek(key) in '0123456789':
+                    pass
+                else:
+                    return False
+            elif char == '[':
+                expect_close_bracket_1 = True
+            elif char == ']':
+                if not expect_close_bracket_1:
+                    return False
+                expect_close_bracket_1 = False
+                if self.peek(key) == ' ':
+                    pass
+                else:
+                    return False
+            elif char == '(':
+                if self.peek(key) in '-0123456789':
+                    expect_close_bracket_2 = True
+                    pass
+                else:
+                    return False
+            elif char == ')':
+                if not expect_close_bracket_2:
+                    return False
+                expect_close_bracket_2 = False
+                if self.peek(key) == ' ':
+                    pass
+                else:
+                    return False
+            elif char == ' ':
+                got_minus = False
+            else:
+                if key == len(self.expression):
+                    pass
+                return False
+
+        if expect_close_bracket_1 == False and expect_close_bracket_2 == False:
+            return True
+
+
+def evaluate(expression):
+    correct_pattern = True
+    checker = check_pattern(expression)
+    correct_pattern = checker.check()
+    p = Parser()
+
+    if correct_pattern:
+        try:
+            p.set_value(expression)
+            saved_key, value = p.getValue()
+            print(saved_key,': ', value)
+        except Exception as ex:
+            msg = ex.message
+            raise Exception(msg)
+
+        if int(value) == value:
+            return int(value)
+    else:
+        print('err: invalid expression')
+        return None
 
 
 def main():
-    sys_args = sys.argv[1:]
-    Cas(sys_args)
+    keep_looping = True
+    while keep_looping:
+        try:
+            command = input("\n>> ")
+            if command == 'exit':
+                keep_looping = False
+            elif command != '':
+                evaluate(command)
+        except EOFError:
+            keep_looping = False
 
 
 main()
