@@ -44,10 +44,10 @@ class Parser:
             char = self.peek()
             if char == '+':
                 self.index += 1
-                values.append(self.parseParenthesis())
+                values.append(self.parseMultiplication())
             elif char == '-':
                 self.index += 1
-                values.append(-1 * self.parseParenthesis())
+                values.append(-1 * self.parseMultiplication())
             else:
                 break
 
