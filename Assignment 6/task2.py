@@ -180,14 +180,14 @@ class check_pattern:
                     return False
             elif char == '-':
                 got_minus = True
-                if got_operator:
-                    return False
 
                 if self.peek(key) in '0123456789':
                     if got_number:
                         return False
                     pass
                 elif self.peek(key) == ' ':
+                    if got_operator:
+                        return False
                     got_operator = True
                     if got_number:
                         got_number = False
