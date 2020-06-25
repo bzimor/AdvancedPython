@@ -44,10 +44,10 @@ class Parser:
             char = self.peek()
             if char == '+':
                 self.index += 1
-                values.append(self.parseParenthesis())
+                values.append(self.parseMultiplication())
             elif char == '-':
                 self.index += 1
-                values.append(-1 * self.parseParenthesis())
+                values.append(-1 * self.parseMultiplication())
             else:
                 break
 
@@ -71,7 +71,7 @@ class Parser:
                 denominator = self.parseParenthesis()
                 if denominator == 0:
                     raise Exception('error')
-                values.append(1.0 / denominator)
+                values.append('/'+str(denominator))
             else:
                 break
         value = 0
@@ -80,12 +80,42 @@ class Parser:
             if kkey == 0:
                 first_val = factor
                 value = factor
+            elif type(factor) is str:
+                number_factor = int(factor[1:])
+                negativity = self.parseNegativity(value, number_factor)
+                check_value = value
+                count = 0
+                if number_factor < 0:
+                    number_factor *= -1
+                while check_value > 0:
+                    check_value -= number_factor
+                    if check_value >= 0:
+                        count += 1
+                value = count
+
+                if not negativity:
+                    first_val *= -1
+                    value *= -1
             else:
+                negativity = self.parseNegativity(value, factor)
+                if factor < 0:
+                    factor *= -1
                 for i in range(factor-1):
-                    
                     value += first_val
                 first_val = value
+                if not negativity:
+                    first_val *= -1
+                    value *= -1
+
         return value
+
+    def parseNegativity(self, first_value, second_value):
+        if first_value > 0 and second_value > 0:
+            return False
+        elif first_value < 0 and second_value < 0:
+            return True
+        elif first_value < 0 or second_value < 0:
+            return True
 
     def parseParenthesis(self):
         self.skipWhitespace()
