@@ -74,9 +74,17 @@ class Parser:
                 values.append(1.0 / denominator)
             else:
                 break
-        value = 1.0
-        for factor in values:
-            value *= factor
+        value = 0
+        first_val = 0
+        for kkey, factor in enumerate(values):
+            if kkey == 0:
+                first_val = factor
+                value = factor
+            else:
+                for i in range(factor-1):
+                    
+                    value += first_val
+                first_val = value
         return value
 
     def parseParenthesis(self):
@@ -275,8 +283,8 @@ def main():
 
     def evaluate(expression):
         correct_pattern = True
-        checker = check_pattern(expression)
-        correct_pattern = checker.check()
+        # checker = check_pattern(expression)
+        # correct_pattern = checker.check()
         if correct_pattern:
             try:
                 p.set_value(expression)
