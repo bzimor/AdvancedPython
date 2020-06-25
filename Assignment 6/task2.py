@@ -6,6 +6,7 @@ class Parser:
 
     def set_value(self, string):
         self.string = string
+        self.index = 0
 
     def getValue(self):
         value = self.parseExpression()
@@ -18,7 +19,7 @@ class Parser:
                 str(self.index))
 
         self.saved_result.append(value)
-        return len(self.saved_result)-1, value
+        return len(self.saved_result) - 1, value
 
     def peek(self):
         return self.string[self.index:self.index + 1]
@@ -90,12 +91,14 @@ class Parser:
 
     def parseSavedValue(self):
         self.skipWhitespace()
-        str_value = None
+        self.index += 1
+        str_value = ''
         char = ''
 
         while self.hasNext():
             char = self.peek()
             if char == ']':
+                self.index += 1
                 break
             elif char in '0123456789':
                 str_value += char
@@ -199,30 +202,25 @@ class check_pattern:
             return True
 
 
-def evaluate(expression):
-    correct_pattern = True
-    checker = check_pattern(expression)
-    correct_pattern = checker.check()
-    p = Parser()
-
-    if correct_pattern:
-        try:
-            p.set_value(expression)
-            saved_key, value = p.getValue()
-            print(saved_key,': ', value)
-        except Exception as ex:
-            msg = ex.message
-            raise Exception(msg)
-
-        if int(value) == value:
-            return int(value)
-    else:
-        print('err: invalid expression')
-        return None
-
-
 def main():
     keep_looping = True
+    p = Parser()
+
+    def evaluate(expression):
+        correct_pattern = True
+        # checker = check_pattern(expression)
+        # correct_pattern = checker.check()
+        if correct_pattern:
+            try:
+                p.set_value(expression)
+                saved_key, value = p.getValue()
+                print(saved_key, ': ', value)
+            except Exception as ex:
+                print('err: invalid expression')
+        else:
+            print('err: invalid expression')
+            return None
+
     while keep_looping:
         try:
             command = input("\n>> ")
