@@ -1,4 +1,11 @@
+import sys
+
+
 class Parser:
+    '''
+    use 'exit' to terminate the program
+    '''
+
     def __init__(self):
         self.string = ''
         self.index = 0
@@ -247,7 +254,13 @@ class check_pattern:
 
 
 def main():
+    arguments = sys.argv[1:]
     keep_looping = True
+
+    if len(arguments) > 0 and arguments[0] == '-h':
+        print(Parser.__doc__)
+        keep_looping = False
+
     p = Parser()
 
     def evaluate(expression):

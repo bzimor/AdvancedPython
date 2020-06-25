@@ -1,4 +1,7 @@
 class Parser:
+    '''
+    use 'exit' to terminate the program
+    '''
     def __init__(self):
         self.string = ''
         self.index = 0
@@ -82,7 +85,6 @@ class Parser:
                 value = factor
             elif type(factor) is str:
                 number_factor = int(factor[1:])
-                negativity = self.parseNegativity(value, number_factor)
                 check_value = value
                 count = 0
                 if number_factor < 0:
@@ -92,30 +94,12 @@ class Parser:
                     if check_value >= 0:
                         count += 1
                 value = count
-
-                if not negativity:
-                    first_val *= -1
-                    value *= -1
             else:
-                negativity = self.parseNegativity(value, factor)
-                if factor < 0:
-                    factor *= -1
                 for i in range(factor-1):
                     value += first_val
                 first_val = value
-                if not negativity:
-                    first_val *= -1
-                    value *= -1
 
         return value
-
-    def parseNegativity(self, first_value, second_value):
-        if first_value > 0 and second_value > 0:
-            return False
-        elif first_value < 0 and second_value < 0:
-            return True
-        elif first_value < 0 or second_value < 0:
-            return True
 
     def parseParenthesis(self):
         self.skipWhitespace()
@@ -308,13 +292,19 @@ class check_pattern:
 
 
 def main():
+    arguments = sys.argv[1:]
     keep_looping = True
+
+    if len(arguments) > 0 and arguments[0] == '-h':
+        print(Parser.__doc__)
+        keep_looping = False
+
     p = Parser()
 
     def evaluate(expression):
         correct_pattern = True
-        # checker = check_pattern(expression)
-        # correct_pattern = checker.check()
+        checker = check_pattern(expression)
+        correct_pattern = checker.check()
         if correct_pattern:
             try:
                 p.set_value(expression)
