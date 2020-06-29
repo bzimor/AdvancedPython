@@ -59,9 +59,28 @@ print_a_b()  # call the function to print a and b
 # What are the main restrictions on the lambda?
 # Provide "If yes, why? If not, why not?" for each of the following:
 # 1. Does lambda restrict side effects?
-# 2. Does lambda restrict number of allowed statements?
-# 3. Does lambda restrict assignments?
+# ANSWER:
+# Yes. It is restrcited as the philosophy of funcitional programming. 
+# Quote: 
+# "Functional languages directly inherit the lambda calculus philosophy, 
+# adopting a declarative approach of programming that emphasizes abstraction, 
+# data transformation, composition, and purity (no state and no side effects)."
+# Source: https://realpython.com/python-lambda/
 
+# 2. Does lambda restrict number of allowed statements?
+# ANSWER:
+# Yes. But we can put statements in a def instead (no need to use a lambda). 
+
+# 3. Does lambda restrict assignments?
+# ANSWER:
+# Yes. In python 3.8 the assignment sign ":=" added to support assignments inside lambda expressions.
+# Example:
+# import sys
+# say_hello = lambda: (
+#     message := "Hello world",
+#     sys.stdout.write(message + "\n")
+# )[-1]
+# say_hello()
 
 # 4. Does lambda restrict number of return values?
 # ANSWER:
