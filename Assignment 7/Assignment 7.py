@@ -126,6 +126,10 @@ print("b:", value_b)
 # 1. What happens here? Do the same as in Task 3 and
 # enumerate order of execution using (1,2,3...) in comments
 # [multiline code interlaced with comments]
-
+def concenate_tuples(a, b): # (2) function definition to concenate two tuples
+    def increase_values(x): # (4) function definition to increase given value twice
+        return x + x # (5) return increased value by adding value itself
+    print(list(map(increase_values, a + b))) # (7)prints (6)list of the result which is created by (3) map method to apply increase_values function for each element of tuple a + b
+concenate_tuples((1, 2, 3), (4, 5, 6)) # (1) concenate_tuples funcion is called with two tuple parameters
 # 2. Why does map() requires list() call?
-# [written answer]
+# If list() is not used, print(map()) just prints map iterator object. map() returns iterator object and applying list() function we converted result as a list object
