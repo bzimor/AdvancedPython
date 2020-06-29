@@ -53,7 +53,6 @@ def print_a_b():  # The function itself try to print a and b as a parameter
 
 print_a_b()  # call the function to print a and b
 
-
 # ----------------------------------------------
 # Task 4 (soft)
 # ----------------------------------------------
@@ -61,12 +60,42 @@ print_a_b()  # call the function to print a and b
 # Provide "If yes, why? If not, why not?" for each of the following:
 # 1. Does lambda restrict side effects?
 # 2. Does lambda restrict number of allowed statements?
-# 3. Does lambda restrict assignments? 
-# 4. Does lambda restrict number of return values?
-# 5. Does lambda restrict the use of default arguments values? 
-# 6. Does lambda restrict possible function signatures?
+# 3. Does lambda restrict assignments?
 
-# [your enumerated answers; if possible, code is welcomed]
+
+# 4. Does lambda restrict number of return values?
+# ANSWER:
+# Lambda does not resrtrict the number of return value
+# Basically when we return multiple return value we will use:
+#       return a, b 
+# It is equal with:
+#       return (a, b)
+
+# So we can do like this
+custom_func = lambda a, b: (a, b)
+# and use this to call
+value_a, value_b = custom_func(17, "B")
+
+# 5. Does lambda restrict the use of default arguments values?
+# ANSWER:
+# Lambda does not restrict the default arguments, here is an example:
+custom_func = lambda a=5, b=10: a * b
+
+# but it is also follows the rule that the default should be followed by another default arguments
+# it is also applied to standard function
+#       custom_func = lambda a = 5, b: a*b
+# It will be throw an error because parameter b (has no default value) is written after a (which has default arguments)
+
+
+# 6. Does lambda restrict possible function signatures?
+# ANSWER:
+# Lambda does not restrict the signature
+# We can do like this
+custom_func = lambda a, b: (a, b)
+value_a, value_b = custom_func(b=10, a=2)
+print("a:", value_a)
+print("b:", value_b)
+# We can pass the pass the arguments with the signature and the order won't be matter
 
 
 # Task 5
